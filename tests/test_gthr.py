@@ -25,3 +25,18 @@ class GthrTest(unittest.TestCase):
         args = ["--quiet", "origin", "master"]
         self._test_be_quiet(args, True)
 
+    def _test_process_line(self, line, expected):
+        self._create_gthr([])
+        info = self.gthr.process_line(line)
+        self.assertEquals(expected, info)
+
+    def test_process_line_no_match(self):
+        self._test_process_line('', {})
+
+    def test_process_line_launching(self):
+        self._test_process_line('-----> Launching... done, v100',
+                                {'version': '100'})
+
+    def test_process_line_refid(self):
+        self._test_process_line(' + e20548a...e2524c4 HEAD^ -> master (forced update)',
+                                {'src_ref': 'HEAD^'})
