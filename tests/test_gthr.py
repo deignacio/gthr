@@ -75,3 +75,40 @@ class GthrTest(unittest.TestCase):
                                 'hi mom\n'],
                                 {'version': '100',
                                  'src_ref': 'HEAD^'})
+
+    def _test_validate_push(self, wait_value, info, raises=None):
+        p = Mock()
+        p.wait.return_value = wait_value
+
+        self._create_gthr([])
+        if raises:
+            self.assertRaises(raises,
+                              self.gthr.validate_push,
+                              p,
+                              info)
+        else:
+            self.gthr.validate_push(p, info)
+
+    def test_validate_push_ok(self):
+        info = {'version': '1', 'src_ref': 'master'}
+        wait_value = 0
+
+        self._test_validate_push(wait_value, info)
+
+    def test_validate_push_fail(self):
+        info = {'version': '1', 'src_ref': 'master'}
+        wait_value = 1
+
+        self._test_validate_push(wait_value, info, SystemExit)
+
+    def test_validate_push_missing_version(self):
+        info = {'src_ref': 'master'}
+        wait_value = 0
+
+        self._test_validate_push(wait_value, info, SystemExit)
+
+    def test_validate_push_missing_src_ref(self):
+        info = {'version': '1'}
+        wait_value = 0
+
+        self._test_validate_push(wait_value, info, SystemExit)
