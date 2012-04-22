@@ -1,4 +1,5 @@
-from mock import Mock
+from mock import Mock, patch
+from subprocess import PIPE, STDOUT
 import unittest
 
 from gthr import Gthr
@@ -112,3 +113,20 @@ class GthrTest(unittest.TestCase):
         wait_value = 0
 
         self._test_validate_push(wait_value, info, SystemExit)
+
+    @patch('gthr.Popen')
+    def _test_git_tag(self, info, expected_cmd, mock_popen):
+        self._create_gthr([])
+        p = self.gthr.git_tag(info)
+        self.assertTrue(mock_popen.called)
+        self.assertEquals(1, mock_popen.call_count)
+        call_params = mock_popen.call_args
+        args = call_params[0][0]
+        kwargs = call_params[1]
+        self.assertEquals(expected_cmd, args)
+        self.assertEquals({'stdout':PIPE, 'stderr':STDOUT}, kwargs)
+
+    def test_git_tag_success(self):
+        info = {'version': '1', 'src_ref': 'master'}
+        cmd = ['git', 'tag', '-m', 'gthr tag for heroku release v1', 'heroku-release-v1', 'master']
+        self._test_git_tag(info, cmd)
