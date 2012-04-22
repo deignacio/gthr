@@ -130,3 +130,23 @@ class GthrTest(unittest.TestCase):
         info = {'version': '1', 'src_ref': 'master'}
         cmd = ['git', 'tag', '-m', 'gthr tag for heroku release v1', 'heroku-release-v1', 'master']
         self._test_git_tag(info, cmd)
+
+    def _test_validate_tag(self, wait_value, raises=None):
+        p = Mock()
+        p.wait.return_value = wait_value
+
+        self._create_gthr([])
+        if raises:
+            self.assertRaises(raises,
+                              self.gthr.validate_tag,
+                              p)
+        else:
+            self.gthr.validate_tag(p)
+
+    def test_validate_tag_ok(self):
+        wait_value = 0
+        self._test_validate_tag(wait_value)
+
+    def test_validate_tag_error(self):
+        wait_value = 1
+        self._test_validate_tag(wait_value, SystemExit)
